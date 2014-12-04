@@ -1,0 +1,6 @@
+reclaim - a tool to regain ownership of your files
+
+Usage: ./reclaim [option] <filename>
+Options:
+	--help	shows this menu
+	-v	    verbose output

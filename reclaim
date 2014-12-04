@@ -1,0 +1,52 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then
+	echo "Usage: ./reclaim [option] <filename>"
+	echo "Options:"
+	echo -e "--help\tshows this menu"
+	echo -e "-v\tverbose output"
+fi
+
+function reclaim {
+	if [ -a $1 ]; then
+		USR=`stat -c "%U" $1`
+		GRP=`stat -c "%G" $1`
+		if [ $USR == "root" ]; then
+			echo -e "$1 is owned by root.  Please enter the root password to modify the file:\t"
+			read -s ROOT_PASSWORD
+			echo $ROOT_PASSWORD | sudo -S chmod 664 $1
+			echo $ROOT_PASSWORD | sudo -S chown $USER:$USER $1
+			return 0
+		else
+			chmod 664 $1
+			chown $USR:$GRP $1
+			return 0
+		fi
+	else
+		echo "Error: File '$1' does not exist.  Nothing to reclaim."
+		return 1
+	fi
+	
+}
+
+if [ "$#" -eq 1 ]; then
+	if [ "$1" == "--help" ]; then
+		echo "Usage: ./reclaim [option] <filename>"
+		echo "Options:"
+		echo -e "--help\tshows this menu"
+		echo -e "-v\tverbose output"
+	else
+		reclaim $1
+	fi
+fi
+if [ "$#" -eq 2 ]; then
+	if [ "$1" == "-v" ]; then
+		echo "Reclaiming '$2'"
+		reclaim $2 || { exit 1; }
+		echo "File '$2' was reclaimed!"
+	else
+		echo "Error: Please enter a valid option"
+		exit 1
+	fi
+fi
+
